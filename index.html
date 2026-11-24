@@ -72,6 +72,12 @@ textarea{min-height:90px;resize:vertical}
 .warn{color:var(--warn);font-size:13px;margin:8px 0 0}
 .okt{color:var(--ok);font-size:13px;margin:6px 0 0}
 details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
+.sliders{margin:14px 0 18px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.14)}
+.sl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin:0}
+.sl b{font-size:20px}
+.hero input[type=range]{background:rgba(255,255,255,.2);margin:10px 0 16px;touch-action:none}
+.hero .chip{color:#eef5f8;border-color:rgba(255,255,255,.3)}
+.hero .chips{margin-top:-4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -86,6 +92,17 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
       <div style="text-align:right"><p class="lab">Objetivo</p><div class="pct" id="vObj" style="color:#4fb8ff">100%</div></div>
     </div>
     <div class="bat" style="color:#9fc0d2"><div class="in"><div class="a" id="barA"></div><div class="b" id="barB"></div></div></div>
+    <div class="sliders">
+      <label class="lab sl" for="act"><span>Batería actual</span><b id="lAct" style="color:#35d0a5">30%</b></label>
+      <input type="range" id="act" min="0" max="100" value="30">
+      <label class="lab sl" for="obj"><span>Objetivo de carga</span><b id="lObj" style="color:#4fb8ff">100%</b></label>
+      <input type="range" id="obj" min="0" max="100" value="100">
+      <div class="chips" id="presets">
+        <button class="chip" data-v="80">Hasta 80%</button>
+        <button class="chip" data-v="90">Hasta 90%</button>
+        <button class="chip" data-v="100">Hasta 100%</button>
+      </div>
+    </div>
     <p class="lab" style="margin-top:14px">Tiempo de carga</p>
     <div class="big" id="tiempo">—</div>
     <div class="grid2">
@@ -105,18 +122,6 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
     </div>
     <div class="tile" style="margin-top:10px"><p class="lab" style="margin:0">Autonomía eléctrica añadida</p><b id="km">—</b><p class="lab" id="dias" style="margin:0"></p></div>
     <p class="note" id="detalle"></p>
-  </div>
-
-  <div class="card">
-    <label class="lab" for="act">Batería actual</label>
-    <input type="range" id="act" min="0" max="100" value="30">
-    <label class="lab" for="obj">Objetivo de carga</label>
-    <input type="range" id="obj" min="0" max="100" value="100">
-    <div class="chips" id="presets">
-      <button class="chip" data-v="80">Hasta 80%</button>
-      <button class="chip" data-v="90">Hasta 90%</button>
-      <button class="chip" data-v="100">Hasta 100%</button>
-    </div>
   </div>
 
   <div class="card">
@@ -232,7 +237,7 @@ function calc(){
   const km=eBat/Math.max(1,+st.cons||20)*100;
   const H=parseHoras(st.pv.horas);
 
-  $("vAct").textContent=st.act+"%";$("vObj").textContent=st.obj+"%";
+  $("vAct").textContent=st.act+"%";$("vObj").textContent=st.obj+"%";$("lAct").textContent=st.act+"%";$("lObj").textContent=st.obj+"%";
   $("barA").style.width=st.act+"%";$("barB").style.left=st.act+"%";$("barB").style.width=delta+"%";
   $("act").value=st.act;$("obj").value=st.obj;
   $("hIni").value=st.ini||`${pad(now.getHours())}:${pad(now.getMinutes())}`;
