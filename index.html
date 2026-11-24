@@ -12,73 +12,93 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: herramienta de uso diario, precisa y tranquila, como el propio coche.
-   IDEA: la pantalla de carga del cuadro de instrumentos del Deepal.
-   PICTURE: batería horizontal grande con el tramo a cargar y el resultado enorme.
+/* VOICE: herramienta de uso diario, moderna y tranquila, como el propio coche.
+   IDEA: la pantalla de carga del cuadro de instrumentos del Deepal, de noche en el garaje.
+   PICTURE: el S05 gris plata enchufado, encima de una batería grande con el tramo a cargar.
    COLOUR and TYPE: noche azul petróleo, verde carga, azul objetivo; Space Grotesk.
-   LAYOUT: una columna tipo app de móvil; resultado arriba, controles debajo. */
+   LAYOUT: una columna tipo app de móvil; coche y resultado arriba, controles debajo. */
 :root{color-scheme:light dark;
---bg:light-dark(#eef3f5,#0b1a22);--card:light-dark(#ffffff,#132834);--line:light-dark(#d3dee4,#22394a);
---ink:light-dark(#0b1a22,#eef5f8);--mute:light-dark(#4f6775,#7f9cad);
+--bg:light-dark(#e9f0f3,#061219);--bg2:light-dark(#d7e6ee,#0e3347);
+--card:light-dark(rgba(255,255,255,.78),rgba(19,44,58,.62));--line:light-dark(rgba(11,26,34,.12),rgba(255,255,255,.09));
+--ink:light-dark(#0b1a22,#eef5f8);--mute:light-dark(#4f6775,#86a3b3);
 --ok:light-dark(#0e9e78,#35d0a5);--tgt:light-dark(#1f7fc4,#4fb8ff);--warn:light-dark(#a86400,#f5b84f);
---hero:light-dark(#0f3a52,#123a52)}
+--hero:linear-gradient(165deg,#14475f 0%,#0c2a3a 55%,#081d29 100%)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Space Grotesk',system-ui,sans-serif;overflow-x:clip}
-.wrap{max-width:560px;margin:0 auto;padding:24px 16px 48px}
-h1{font-size:32px;line-height:1.05;margin:2px 0 18px;text-wrap:balance}
-.sub{color:var(--mute);font-size:14px;margin:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
-.hero{background:var(--hero);color:#eef5f8;border:0;--mute:#9fc0d2}
-.big{font-size:clamp(44px,13vw,64px);font-weight:700;line-height:1;margin:4px 0 14px;white-space:nowrap}
+body{margin:0;min-height:100vh;background:radial-gradient(900px 520px at 50% -160px,var(--bg2),transparent 70%),var(--bg);background-attachment:fixed;color:var(--ink);font:16px/1.5 'Space Grotesk',system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:560px;margin:0 auto;padding:22px 14px 48px}
+h1{font-size:30px;line-height:1.05;margin:2px 0 16px;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:20px;line-height:1.1;margin:0;letter-spacing:-.01em}
+.sub{color:var(--mute);font-size:13px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;margin-bottom:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 12px 32px rgba(0,0,0,.18)}
+.hero{background:var(--hero);color:#eef5f8;border:1px solid rgba(79,184,255,.22);--mute:#9fc0d2;--line:rgba(255,255,255,.12);overflow:hidden;position:relative}
+.car{margin:-8px -10px 4px;height:clamp(120px,36vw,170px)}
+.car svg{width:100%;height:100%;display:block}
+.glow{animation:pulse 2s ease-in-out infinite}
+.flow{stroke-dasharray:4 8;animation:flow 1s linear infinite}
+@keyframes pulse{50%{opacity:.35}}@keyframes flow{to{stroke-dashoffset:-12}}
+.big{font-size:clamp(44px,13vw,64px);font-weight:700;line-height:1;margin:4px 0 14px;white-space:nowrap;letter-spacing:-.03em}
 .lab{font-size:13px;color:var(--mute);margin:0 0 4px}
 .row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-.pct{font-size:34px;font-weight:700;line-height:1}
-.bat{position:relative;height:54px;border:3px solid currentColor;border-radius:10px;margin:14px 10px 6px 0;padding:4px}
-.bat::after{content:"";position:absolute;right:-11px;top:14px;width:7px;height:20px;background:currentColor;border-radius:0 4px 4px 0}
-.bat .in{position:relative;height:100%;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.08)}
+.pct{font-size:34px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.bat{position:relative;height:50px;border:2px solid rgba(255,255,255,.55);border-radius:14px;margin:12px 10px 6px 0;padding:4px}
+.bat::after{content:"";position:absolute;right:-9px;top:14px;width:6px;height:18px;background:rgba(255,255,255,.55);border-radius:0 4px 4px 0}
+.bat .in{position:relative;height:100%;border-radius:9px;overflow:hidden;background:rgba(0,0,0,.25)}
 .bat .a,.bat .b{position:absolute;top:0;bottom:0;transition:all .25s}
-.bat .a{left:0;background:#35d0a5}
-.bat .b{background:repeating-linear-gradient(135deg,#4fb8ff 0 8px,#3aa3ea 8px 16px);opacity:.85}
+.bat .a{left:0;background:linear-gradient(90deg,#1fae86,#35d0a5);box-shadow:0 0 18px rgba(53,208,165,.55)}
+.bat .b{background:repeating-linear-gradient(135deg,rgba(79,184,255,.95) 0 8px,rgba(58,163,234,.7) 8px 16px);background-size:22px 22px;animation:stripes 1s linear infinite}
+@keyframes stripes{to{background-position:22px 0}}
+.sliders{margin:14px 0 18px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.12)}
+.sl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin:0}
+.sl b{font-size:20px}
 .grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
-.tile{background:rgba(255,255,255,.07);border-radius:12px;padding:10px 12px}
-.tile b{display:block;font-size:22px;white-space:nowrap}
-.tile.ok{background:rgba(53,208,165,.16);border:1px solid #35d0a5;color:#7fe7c8}
-.tile.tip{background:rgba(245,184,79,.14);border:1px solid #f5b84f;color:#ffd895}
+.tile{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px 12px}
+.tile b{display:block;font-size:22px;white-space:nowrap;letter-spacing:-.01em}
+.tile.ok{background:rgba(53,208,165,.14);border-color:rgba(53,208,165,.6);color:#7fe7c8}
+.tile.tip{background:rgba(245,184,79,.12);border-color:rgba(245,184,79,.55);color:#ffd895}
 .note{font-size:13px;color:var(--mute);margin:12px 0 0}
-.per{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:8px 0 4px;background:rgba(255,255,255,.08)}
+.per{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:12px 0 6px;background:rgba(255,255,255,.08)}
 .per i{display:block;height:100%}
 .leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:#9fc0d2}
 .leg span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;background:var(--c)}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--line);outline:none;margin:10px 0 18px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:5px solid var(--ok);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--line);outline:none;margin:10px 0 16px}
+.hero input[type=range]{background:rgba(255,255,255,.18);touch-action:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:5px solid var(--ok);box-shadow:0 0 0 6px rgba(53,208,165,.18),0 2px 8px rgba(0,0,0,.35)}
 input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:5px solid var(--ok)}
-#obj::-webkit-slider-thumb{border-color:var(--tgt)}#obj::-moz-range-thumb{border-color:var(--tgt)}
+#obj::-webkit-slider-thumb{border-color:var(--tgt);box-shadow:0 0 0 6px rgba(79,184,255,.18),0 2px 8px rgba(0,0,0,.35)}#obj::-moz-range-thumb{border-color:var(--tgt)}
 input:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--tgt);outline-offset:2px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:-6px}
-.chip{min-height:38px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:-4px}
+.chip{min-height:38px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.hero .chip{color:#eef5f8;border-color:rgba(255,255,255,.25)}
 .opts{display:grid;gap:8px}
-.opt{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:56px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
-.opt[aria-pressed=true]{border-color:var(--tgt);background:light-dark(#e6f2fb,#1b3a4f)}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:58px;padding:10px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(127,127,127,.05);color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:border-color .2s,background .2s}
+.opt[aria-pressed=true]{border-color:var(--tgt);background:light-dark(rgba(31,127,196,.1),rgba(79,184,255,.12));box-shadow:inset 0 0 0 1px var(--tgt)}
 .opt small{display:block;color:var(--mute);font-size:13px}
 .opt span.k{font-weight:700;color:var(--tgt);white-space:nowrap}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
 .f label{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}
-.f input,textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.f input,textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(127,127,127,.08);color:var(--ink)}
 textarea{min-height:90px;resize:vertical}
 .hero input[type=time]{width:100%;font:inherit;font-size:22px;font-weight:700;background:transparent;color:#fff;border:0;padding:0;color-scheme:dark}
-.mini{border:0;border-radius:999px;padding:3px 9px;background:rgba(79,184,255,.22);color:#9fd6ff;cursor:pointer;font:inherit;font-size:12px}
-.btn{min-height:44px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.mini{border:0;border-radius:999px;padding:3px 10px;background:rgba(79,184,255,.22);color:#9fd6ff;cursor:pointer;font:inherit;font-size:12px}
+.btn{min-height:44px;padding:8px 14px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
 .warn{color:var(--warn);font-size:13px;margin:8px 0 0}
 .okt{color:var(--ok);font-size:13px;margin:6px 0 0}
 details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
-.sliders{margin:14px 0 18px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.14)}
-.sl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin:0}
-.sl b{font-size:20px}
-.hero input[type=range]{background:rgba(255,255,255,.2);margin:10px 0 16px;touch-action:none}
-.hero .chip{color:#eef5f8;border-color:rgba(255,255,255,.3)}
-.hero .chips{margin-top:-4px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.seg{display:flex;background:rgba(127,127,127,.14);border-radius:999px;padding:3px;flex:none}
+.seg button{border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;padding:6px 14px;border-radius:999px;min-height:34px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--tgt);color:#04121a;font-weight:600}
+.pxbars{display:flex;align-items:flex-end;gap:3px;height:150px;margin-bottom:22px}
+.px{flex:1;height:100%;display:flex;align-items:flex-end;border:0;background:transparent;padding:0;cursor:pointer;position:relative}
+.px i{display:block;width:100%;border-radius:4px 4px 2px 2px;opacity:.75;transition:opacity .15s}
+.px span{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--mute)}
+.px.now i{opacity:1;outline:2px solid var(--ink);outline-offset:1px}
+.px.sel i{opacity:1;filter:brightness(1.2)}
+.pxsel{font-size:15px;font-weight:600;margin:0 0 10px;text-align:center;min-height:22px}
+.pxstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pxstats div{background:rgba(127,127,127,.1);border-radius:14px;padding:10px;text-align:center}
+.pxstats small{display:block;font-size:12px;color:var(--mute)}.pxstats b{font-size:18px;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -87,6 +107,32 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
   <h1>Calculadora de carga</h1>
 
   <div class="card hero" aria-live="polite">
+    <div class="car" aria-hidden="true"><svg viewBox="0 0 400 160" preserveAspectRatio="xMidYMax meet">
+<defs>
+<linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1f5f7"/><stop offset=".45" stop-color="#b9c4ca"/><stop offset="1" stop-color="#5f6c74"/></linearGradient>
+<linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a4b5d"/><stop offset="1" stop-color="#0a1820"/></linearGradient>
+<radialGradient id="gRim"><stop offset="0" stop-color="#d9e1e6"/><stop offset="1" stop-color="#55626a"/></radialGradient>
+<radialGradient id="gFloor"><stop offset="0" stop-color="#35d0a5" stop-opacity=".28"/><stop offset="1" stop-color="#35d0a5" stop-opacity="0"/></radialGradient>
+</defs>
+<ellipse cx="205" cy="143" rx="190" ry="16" fill="url(#gFloor)"/>
+<ellipse cx="205" cy="143" rx="160" ry="6" fill="rgba(0,0,0,.45)"/>
+<path d="M328 88 C366 92 392 116 394 143" fill="none" stroke="#0b1920" stroke-width="5" stroke-linecap="round"/>
+<path class="flow" d="M328 88 C366 92 392 116 394 143" fill="none" stroke="#35d0a5" stroke-width="2" stroke-linecap="round"/>
+<path d="M28 110 C28 96 36 88 56 84 L118 76 C138 56 168 44 212 42 C252 41 288 48 316 66 L352 76 C368 80 376 90 376 104 L376 112 C376 116 373 118 369 118 L337 118 A28 28 0 0 0 281 118 L131 118 A28 28 0 0 0 75 118 L36 118 C31 118 28 115 28 110 Z" fill="url(#gBody)"/>
+<path d="M36 118 L75 118 A28 28 0 0 1 77 108 L44 108 Z M131 118 L281 118 L283 110 L129 110 Z M337 118 L369 118 C373 118 376 116 376 112 L376 108 L335 108 Z" fill="#2b363d"/>
+<path d="M136 78 C154 60 178 51 212 50 C244 49 272 55 296 68 L302 76 L140 79 Z" fill="url(#gGlass)"/>
+<path d="M150 74 C166 62 186 56 208 55" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round"/>
+<rect x="213" y="50" width="4" height="29" fill="#55626a"/>
+<path d="M58 94 L352 88" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>
+<rect x="178" y="94" width="18" height="3" rx="1.5" fill="rgba(0,0,0,.35)"/><rect x="258" y="92" width="18" height="3" rx="1.5" fill="rgba(0,0,0,.35)"/>
+<path d="M128 79 l-12 -3 l-3 7 l15 0 Z" fill="#6f7c84"/>
+<path d="M31 99 L60 91" stroke="#e6fbff" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M31 99 L60 91" stroke="#bff3ff" stroke-width="9" stroke-linecap="round" opacity=".25"/>
+<path d="M354 80 L373 87" stroke="#ff4d5e" stroke-width="3.5" stroke-linecap="round"/>
+<rect x="318" y="82" width="11" height="8" rx="2" fill="#35d0a5" class="glow"/>
+<g><circle cx="103" cy="118" r="24" fill="#0d1418"/><circle cx="103" cy="118" r="16" fill="url(#gRim)"/><circle cx="103" cy="118" r="11" fill="none" stroke="#2a353c" stroke-width="6" stroke-dasharray="4 3"/><circle cx="103" cy="118" r="4" fill="#1a2329"/></g>
+<g><circle cx="309" cy="118" r="24" fill="#0d1418"/><circle cx="309" cy="118" r="16" fill="url(#gRim)"/><circle cx="309" cy="118" r="11" fill="none" stroke="#2a353c" stroke-width="6" stroke-dasharray="4 3"/><circle cx="309" cy="118" r="4" fill="#1a2329"/></g>
+</svg></div>
     <div class="row">
       <div><p class="lab">Ahora</p><div class="pct" id="vAct" style="color:#35d0a5">30%</div></div>
       <div style="text-align:right"><p class="lab">Objetivo</p><div class="pct" id="vObj" style="color:#4fb8ff">100%</div></div>
@@ -122,6 +168,14 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
     </div>
     <div class="tile" style="margin-top:10px"><p class="lab" style="margin:0">Autonomía eléctrica añadida</p><b id="km">—</b><p class="lab" id="dias" style="margin:0"></p></div>
     <p class="note" id="detalle"></p>
+  </div>
+
+  <div class="card" id="precios">
+    <div class="row" style="align-items:center"><h2>Precios PVPC</h2><div class="seg" id="pxTabs"><button data-d="0" aria-pressed="true">Hoy</button><button data-d="1" aria-pressed="false">Mañana</button></div></div>
+    <p class="note" style="margin:6px 0 14px">€/kWh por hora con impuestos. Toca una barra para ver su precio.</p>
+    <div class="pxbars" id="pxBars"></div>
+    <p class="pxsel" id="pxSel"></p>
+    <div class="pxstats" id="pxStats"></div>
   </div>
 
   <div class="card">
@@ -295,6 +349,7 @@ function calc(){
 const upd=()=>{save();calc()};
 const pvIn=(id,k)=>{$(id).value=st.pv[k];$(id).addEventListener("input",e=>{st.pv[k]=e.target.value;upd()})};
 pvIn("pPunta","punta");pvIn("pLlano","llano");pvIn("pValle","valle");pvIn("imp","imp");
+$("imp").addEventListener("input",()=>renderPrecios());
 $("horas").value=st.pv.horas;
 $("horas").addEventListener("input",e=>{st.pv.horas=e.target.value;upd()});
 $("limpiar").addEventListener("click",()=>{st.pv.horas="";$("horas").value="";upd()});
@@ -308,12 +363,31 @@ $("cons").addEventListener("input",e=>{st.cons=e.target.value;upd()});
 $("kmdia").addEventListener("input",e=>{st.kmdia=e.target.value;upd()});
 $("hIni").addEventListener("change",e=>{st.ini=e.target.value||null;calc()});
 $("btnAhora").addEventListener("click",()=>{st.ini=null;calc()});
+let diaSel=0,PXV=[];
+function pxTxt(h){const v=PXV[h];return v==null?`${pad(h)}:00 · sin precio`:`${pad(h)}:00–${pad((h+1)%24)}:00 · ${num(v,3)} €/kWh`}
+function renderPrecios(){
+  const box=$("pxBars");if(!box)return;
+  const f=1+(+st.pv.imp||0)/100,now=new Date(),d=new Date(now.getTime()+diaSel*864e5);
+  document.querySelectorAll("#pxTabs button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.d===diaSel)));
+  const a=AUTO&&AUTO.dias[clave(d)];
+  if(!a||!a.some(v=>v!=null)){PXV=[];box.innerHTML=`<p class="note" style="margin:auto;text-align:center">${diaSel?"Los precios de mañana se publican hacia las 20:15. Se cargarán solos.":"Aún no hay precios de hoy."}</p>`;$("pxStats").innerHTML="";$("pxSel").textContent="";return}
+  PXV=a.map(x=>x==null?null:x*f);
+  const v=PXV.filter(x=>x!=null),mn=Math.min(...v),mx=Math.max(...v),av=v.reduce((s,x)=>s+x,0)/v.length,rg=(mx-mn)||1;
+  const col=x=>{const t=(x-mn)/rg;return t<.34?"#35d0a5":t<.67?"#f5b84f":"#ff6b6b"};
+  const hNow=diaSel===0?now.getHours():-1;
+  box.innerHTML=PXV.map((x,h)=>`<button class="px${h===hNow?" now":""}" data-h="${h}" aria-label="${pxTxt(h)}"><i style="height:${x==null?2:12+88*(x-mn)/rg}%;background:${x==null?"rgba(127,127,127,.3)":col(x)}"></i><span>${h%6?"":pad(h)}</span></button>`).join("");
+  const iMn=PXV.indexOf(mn),iMx=PXV.indexOf(mx);
+  $("pxStats").innerHTML=`<div><small>Más barata</small><b style="color:var(--ok)">${num(mn,3)}</b><small>${pad(iMn)}:00</small></div><div><small>Media</small><b>${num(av,3)}</b><small>€/kWh</small></div><div><small>Más cara</small><b style="color:#ff6b6b">${num(mx,3)}</b><small>${pad(iMx)}:00</small></div>`;
+  $("pxSel").textContent=hNow>=0?"Ahora: "+pxTxt(hNow):"Más barata: "+pxTxt(iMn);
+}
+$("pxTabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b){diaSel=+b.dataset.d;renderPrecios()}});
+$("pxBars").addEventListener("click",e=>{const b=e.target.closest(".px");if(!b)return;document.querySelectorAll(".px.sel").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");$("pxSel").textContent=pxTxt(+b.dataset.h)});
 function cargaAuto(){
   fetch("precios.json?"+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
     AUTO=j;const n=new Date(),m=new Date(n.getTime()+864e5);
     const tiene=d=>!!(j.dias[clave(d)]&&j.dias[clave(d)].some(v=>v!=null));
     const act=new Date(j.actualizado).toLocaleString("es-ES",{weekday:"short",hour:"2-digit",minute:"2-digit"});
-    $("autoOk").textContent=`Precios oficiales PVPC: hoy ${tiene(n)?"✓":"—"} · mañana ${tiene(m)?"✓":"aún no publicados"} (actualizado ${act}, ${j.fuente}).`;
+    renderPrecios();$("autoOk").textContent=`Precios oficiales PVPC: hoy ${tiene(n)?"✓":"—"} · mañana ${tiene(m)?"✓":"aún no publicados"} (actualizado ${act}, ${j.fuente}).`;
     calc();
   }).catch(()=>{$("autoOk").textContent="Sin precios automáticos aquí: se usan los manuales o por tramo.";});
 }
