@@ -98,6 +98,14 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
 .pxstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .pxstats div{background:rgba(127,127,127,.1);border-radius:14px;padding:10px;text-align:center}
 .pxstats small{display:block;font-size:12px;color:var(--mute)}.pxstats b{font-size:18px;white-space:nowrap}
+.bat{height:62px;margin:16px 10px 8px 0;touch-action:none;user-select:none;-webkit-user-select:none}
+.trk{position:absolute;inset:4px;touch-action:none;cursor:pointer}
+.hd{position:absolute;top:-12px;bottom:-12px;width:24px;transform:translateX(-50%);border-radius:12px;background:#fff;box-shadow:0 3px 12px rgba(0,0,0,.5);touch-action:none;transition:transform .12s}
+.hd::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:42%;transform:translate(-50%,-50%);border-radius:2px;background:var(--c)}
+.ha{--c:#35d0a5;border:3px solid #35d0a5}.hb{--c:#4fb8ff;border:3px solid #4fb8ff}
+.hd.drag{transform:translateX(-50%) scale(1.18)}
+.sliders .sl,.sliders input[type=range]{display:none}
+.hint{margin:6px 0 12px;font-size:13px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -137,13 +145,14 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
       <div><p class="lab">Ahora</p><div class="pct" id="vAct" style="color:#35d0a5">30%</div></div>
       <div style="text-align:right"><p class="lab">Objetivo</p><div class="pct" id="vObj" style="color:#4fb8ff">100%</div></div>
     </div>
-    <div class="bat" style="color:#9fc0d2"><div class="in"><div class="a" id="barA"></div><div class="b" id="barB"></div></div></div>
+    <div class="bat" style="color:#9fc0d2"><div class="in"><div class="a" id="barA"></div><div class="b" id="barB"></div></div><div class="trk" id="trk"><span class="hd ha" id="hA" role="slider" tabindex="0" aria-label="Batería actual" aria-valuemin="0" aria-valuemax="100"></span><span class="hd hb" id="hB" role="slider" tabindex="0" aria-label="Objetivo de carga" aria-valuemin="0" aria-valuemax="100"></span></div></div>
     <div class="sliders">
       <label class="lab sl" for="act"><span>Batería actual</span><b id="lAct" style="color:#35d0a5">30%</b></label>
       <input type="range" id="act" min="0" max="100" value="30">
       <label class="lab sl" for="obj"><span>Objetivo de carga</span><b id="lObj" style="color:#4fb8ff">100%</b></label>
       <input type="range" id="obj" min="0" max="100" value="100">
-      <div class="chips" id="presets">
+      <p class="note hint">Arrastra sobre la barra: <b style="color:#35d0a5">verde</b> batería actual · <b style="color:#4fb8ff">azul</b> objetivo</p>
+        <div class="chips" id="presets">
         <button class="chip" data-v="80">Hasta 80%</button>
         <button class="chip" data-v="90">Hasta 90%</button>
         <button class="chip" data-v="100">Hasta 100%</button>
@@ -291,7 +300,7 @@ function calc(){
   const km=eBat/Math.max(1,+st.cons||20)*100;
   const H=parseHoras(st.pv.horas);
 
-  $("vAct").textContent=st.act+"%";$("vObj").textContent=st.obj+"%";$("lAct").textContent=st.act+"%";$("lObj").textContent=st.obj+"%";
+  $("vAct").textContent=st.act+"%";$("vObj").textContent=st.obj+"%";$("lAct").textContent=st.act+"%";$("lObj").textContent=st.obj+"%";$("hA").style.left=st.act+"%";$("hB").style.left=st.obj+"%";$("hA").setAttribute("aria-valuenow",st.act);$("hB").setAttribute("aria-valuenow",st.obj);
   $("barA").style.width=st.act+"%";$("barB").style.left=st.act+"%";$("barB").style.width=delta+"%";
   $("act").value=st.act;$("obj").value=st.obj;
   $("hIni").value=st.ini||`${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -382,6 +391,21 @@ function renderPrecios(){
 }
 $("pxTabs").addEventListener("click",e=>{const b=e.target.closest("button");if(b){diaSel=+b.dataset.d;renderPrecios()}});
 $("pxBars").addEventListener("click",e=>{const b=e.target.closest(".px");if(!b)return;document.querySelectorAll(".px.sel").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");$("pxSel").textContent=pxTxt(+b.dataset.h)});
+{const tr=$("trk");let which=null;
+const pctDe=e=>{const r=tr.getBoundingClientRect();return Math.round(Math.min(100,Math.max(0,(e.clientX-r.left)/r.width*100)))};
+const fija=(w,v)=>{if(w==="a"){st.act=v;if(st.act>st.obj)st.obj=st.act}else{st.obj=v;if(st.obj<st.act)st.act=st.obj}upd()};
+tr.addEventListener("pointerdown",e=>{const v=pctDe(e);
+  if(e.target.id==="hA")which="a";else if(e.target.id==="hB")which="b";
+  else if(st.act===st.obj)which=v<st.act?"a":"b";
+  else which=Math.abs(v-st.act)<Math.abs(v-st.obj)?"a":"b";
+  try{tr.setPointerCapture(e.pointerId)}catch(_){}
+  $(which==="a"?"hA":"hB").classList.add("drag");fija(which,v);e.preventDefault()});
+tr.addEventListener("pointermove",e=>{if(which)fija(which,pctDe(e))});
+const fin=()=>{which=null;document.querySelectorAll(".hd.drag").forEach(x=>x.classList.remove("drag"))};
+tr.addEventListener("pointerup",fin);tr.addEventListener("pointercancel",fin);
+[["hA","a"],["hB","b"]].forEach(([id,w])=>$(id).addEventListener("keydown",e=>{const p=e.shiftKey?10:1,cur=w==="a"?st.act:st.obj;
+  if(e.key==="ArrowRight"||e.key==="ArrowUp"){fija(w,Math.min(100,cur+p));e.preventDefault()}
+  if(e.key==="ArrowLeft"||e.key==="ArrowDown"){fija(w,Math.max(0,cur-p));e.preventDefault()}}));}
 function cargaAuto(){
   fetch("precios.json?"+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
     AUTO=j;const n=new Date(),m=new Date(n.getTime()+864e5);
