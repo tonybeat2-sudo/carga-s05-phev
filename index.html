@@ -174,7 +174,13 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
   </div>
 
   <div class="card" id="pvCard" hidden>
-    <p class="lab">Tarifa PVPC 2.0TD (casa)</p>
+    <div class="row" style="align-items:center;flex-wrap:wrap;margin-bottom:10px"><p class="lab" style="margin:0">Tarifa de casa</p><div class="seg" id="tarSeg"><button data-t="pvpc" aria-pressed="true">PVPC</button><button data-t="iog" aria-pressed="false">Intelligent Go</button></div></div>
+    <div id="iogBox" hidden>
+      <div class="fields" style="margin-top:0"><div class="f"><label for="iogP">Precio carga Intelligent Octopus Go (€/kWh)</label><input type="number" id="iogP" step="0.001" min="0"></div></div>
+      <p class="note">Precio fijo para la carga del coche (por defecto 0,068 €/kWh; ajústalo al de tu contrato). Octopus decide a qué horas carga y tú solo eliges en su app a qué hora lo quieres listo. Necesita un coche o un cargador compatible con Octopus (por ejemplo V2C Trydan o Wallbox); con un cargador portátil sin conexión no funciona.</p>
+    </div>
+    <div id="pvpcBox">
+    <p class="lab">PVPC 2.0TD</p>
     <p class="okt" id="autoOk" style="margin:0 0 8px">Buscando precios oficiales de hoy y mañana…</p>
     <details style="margin-bottom:4px"><summary>Pegar precios a mano (opcional)</summary>
     <p class="note" style="margin:0 0 4px">Solo hace falta si no hay precios automáticos para ese día. 24 valores (o 96 cuartohorarios) en €/kWh o €/MWh, con coma o punto.</p>
@@ -187,7 +193,7 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
       <div class="f"><label for="pValle">Valle (€/kWh)</label><input type="number" id="pValle" step="0.001" min="0"></div>
       <div class="f"><label for="imp">Impuestos sobre energía (%)</label><input type="number" id="imp" step="0.1" min="0"></div>
     </div>
-    <div class="row" style="margin-top:10px;align-items:center"><p class="note" style="margin:0">Punta 10–14 y 18–22 · llano 8–10, 14–18 y 22–24 · valle 0–8, sábados y domingos (L–V).</p><button class="btn" id="limpiar">Borrar precios</button></div>
+    <div class="row" style="margin-top:10px;align-items:center"><p class="note" style="margin:0">Punta 10–14 y 18–22 · llano 8–10, 14–18 y 22–24 · valle 0–8, sábados y domingos (L–V).</p><button class="btn" id="limpiar">Borrar precios</button></div></div>
   </div>
 
   <div class="card">
@@ -223,7 +229,7 @@ const CARG=[
 ];
 const COL={valle:"#35d0a5",llano:"#f5b84f",punta:"#ff6b6b"};
 const $=id=>document.getElementById(id);
-let st={act:30,obj:100,id:"depow10",kwc:6,cons:20,kmdia:0,ini:null,precios:{},
+let st={act:30,obj:100,id:"depow10",kwc:6,cons:20,kmdia:0,ini:null,precios:{},tar:"pvpc",iogP:0.068,
   pv:{punta:0.20,llano:0.13,valle:0.08,imp:27.2,horas:""}};
 try{const s=JSON.parse(localStorage.getItem("cargaS05phev")||"{}");Object.assign(st,s,{pv:Object.assign(st.pv,s.pv||{})});st.ini=null}catch(e){}
 const save=()=>{try{localStorage.setItem("cargaS05phev",JSON.stringify(st))}catch(e){}};
@@ -285,7 +291,7 @@ function calc(){
   $("iniTxt").textContent=st.ini?(ini.getDate()!==now.getDate()?"mañana":"hoy"):"hora actual";
   $("cons").value=st.cons;$("kmdia").value=st.kmdia;$("kwc").value=st.kwc;
   $("customBox").hidden=c.id!=="custom";
-  $("pvCard").hidden=!c.pv;$("pvBox").hidden=!c.pv||!delta;$("precioBox").hidden=!!c.pv;
+  $("pvCard").hidden=!c.pv;$("iogBox").hidden=st.tar!=="iog";$("pvpcBox").hidden=st.tar==="iog";document.querySelectorAll("#tarSeg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.t===st.tar)));$("pvBox").hidden=!c.pv||!delta;$("precioBox").hidden=!!c.pv;
   if(!c.pv)$("precio").value=st.precios[c.id]??c.p;
   $("horasOk").textContent=st.pv.horas.trim()?(H?`Usando ${H.length} precios ${H.length===24?"horarios":"cuartohorarios"} pegados.`:"No reconozco 24 ni 96 valores: uso los precios por tramo."):"";
   const av=$("aviso");
@@ -321,6 +327,7 @@ function calc(){
     $("mejor").textContent=`${esAhora?"Ahora mismo":cuando(best.s,now)} → ${num(best.c,2)} €`;
     $("mejorSub").textContent=`Terminaría ${cuando(finB,now)}${ahorro>0.005?` · ahorras ${num(ahorro,2)} €`:" · ya es lo más barato"}${best.est?" · con precios aún no publicados (estimado)":""}`;
     $("usarMejor").hidden=esAhora;
+    if(st.tar==="iog"){const pi=+st.iogP||0,ci=eRed*pi,dif=r.c-ci;$("costeLab").textContent="Coste Intelligent Go";$("coste").textContent=num(ci,2)+" €";$("costeSub").textContent="a "+num(pi,3)+" €/kWh · con PVPC "+num(r.c,2)+" €";$("pvBox").hidden=true;$("detalle").dataset.iog=dif>0?"Con Intelligent Octopus Go ahorras "+num(dif,2)+" € frente al PVPC empezando a esta hora. ":"";}else{$("detalle").dataset.iog=""}
     $("usarMejor").onclick=()=>{st.ini=`${pad(best.s.getHours())}:00`;calc()};
   }else{
     const precio=st.precios[c.id]??c.p;
@@ -328,9 +335,9 @@ function calc(){
     $("coste").textContent=num(eRed*precio,2)+" €";
     $("costeSub").textContent=`a ${num(precio,2)} €/kWh`;
   }
-  $("detalle").innerHTML=isDC
+  $("detalle").innerHTML=(c.pv&&st.tar==="iog"?($("detalle").dataset.iog||""):"")+(isDC
     ? `${num(eBat)} kWh a la batería en DC (curva media ~38 kW hasta 80 %, ~12 kW después).`
-    : `${num(eBat)} kWh a la batería a ${num(pot,2)} kW · incluye ~10 % de pérdidas AC${bal?" y 10 min de equilibrado al 100 %":""}. Programa en el coche: inicio <b>${hora(ini)}</b>, fin <b>${hora(fin)}</b>.`;
+    : `${num(eBat)} kWh a la batería a ${num(pot,2)} kW · incluye ~10 % de pérdidas AC${bal?" y 10 min de equilibrado al 100 %":""}. Programa en el coche: inicio <b>${hora(ini)}</b>, fin <b>${hora(fin)}</b>.`);
 }
 const upd=()=>{save();calc()};
 const pvIn=(id,k)=>{$(id).value=st.pv[k];$(id).addEventListener("input",e=>{st.pv[k]=e.target.value;upd()})};
@@ -383,6 +390,8 @@ tr.addEventListener("pointerup",fin);tr.addEventListener("pointercancel",fin);
 [["hA","a"],["hB","b"]].forEach(([id,w])=>$(id).addEventListener("keydown",e=>{const p=e.shiftKey?10:1,cur=w==="a"?st.act:st.obj;
   if(e.key==="ArrowRight"||e.key==="ArrowUp"){fija(w,Math.min(100,cur+p));e.preventDefault()}
   if(e.key==="ArrowLeft"||e.key==="ArrowDown"){fija(w,Math.max(0,cur-p));e.preventDefault()}}));}
+$("tarSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(b){st.tar=b.dataset.t;upd()}});
+$("iogP").value=st.iogP;$("iogP").addEventListener("input",e=>{st.iogP=e.target.value;upd()});
 function cargaAuto(){
   fetch("precios.json?"+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
     AUTO=j;const n=new Date(),m=new Date(n.getTime()+864e5);
