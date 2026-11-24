@@ -168,7 +168,7 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
     <p class="lab">Cargador</p>
     <div class="opts" id="opts"></div>
     <div class="fields" id="customBox" hidden>
-      <div class="f"><label for="kwc">Potencia (kW)</label><input type="number" id="kwc" min="0.5" max="55" step="0.1" value="6"></div>
+      <div class="f"><label for="kwc">Potencia (kW)</label><input type="number" id="kwc" min="0.5" max="55" step="0.01" value="6"></div>
     </div>
     <p class="warn" id="aviso" hidden></p>
   </div>
@@ -258,7 +258,7 @@ const dcRate=(pct,max)=>Math.min(pct<80?38:12,max);
 function renderOpts(){
   $("opts").innerHTML=CARG.map(c=>`<button class="opt" data-id="${c.id}" aria-pressed="${c.id===st.id}">
     <span><b style="font-weight:500">${c.n}</b><small>${c.d}</small></span>
-    <span class="k">${c.kw?num(c.kw,c.kw%1?1:0)+" kW":"—"}</span></button>`).join("");
+    <span class="k">${c.kw?num(c.kw,2)+" kW":"—"}</span></button>`).join("");
 }
 
 function calc(){
