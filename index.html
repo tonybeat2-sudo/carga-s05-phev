@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1a22">
+<title>Carga S05 PHEV</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: herramienta de uso diario, precisa y tranquila, como el propio coche.
+   IDEA: la pantalla de carga del cuadro de instrumentos del Deepal.
+   PICTURE: batería horizontal grande con el tramo a cargar y el resultado enorme.
+   COLOUR and TYPE: noche azul petróleo, verde carga, azul objetivo; Space Grotesk.
+   LAYOUT: una columna tipo app de móvil; resultado arriba, controles debajo. */
+:root{color-scheme:light dark;
+--bg:light-dark(#eef3f5,#0b1a22);--card:light-dark(#ffffff,#132834);--line:light-dark(#d3dee4,#22394a);
+--ink:light-dark(#0b1a22,#eef5f8);--mute:light-dark(#4f6775,#7f9cad);
+--ok:light-dark(#0e9e78,#35d0a5);--tgt:light-dark(#1f7fc4,#4fb8ff);--warn:light-dark(#a86400,#f5b84f);
+--hero:light-dark(#0f3a52,#123a52)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Space Grotesk',system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:560px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:32px;line-height:1.05;margin:2px 0 18px;text-wrap:balance}
+.sub{color:var(--mute);font-size:14px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.hero{background:var(--hero);color:#eef5f8;border:0;--mute:#9fc0d2}
+.big{font-size:clamp(44px,13vw,64px);font-weight:700;line-height:1;margin:4px 0 14px;white-space:nowrap}
+.lab{font-size:13px;color:var(--mute);margin:0 0 4px}
+.row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.pct{font-size:34px;font-weight:700;line-height:1}
+.bat{position:relative;height:54px;border:3px solid currentColor;border-radius:10px;margin:14px 10px 6px 0;padding:4px}
+.bat::after{content:"";position:absolute;right:-11px;top:14px;width:7px;height:20px;background:currentColor;border-radius:0 4px 4px 0}
+.bat .in{position:relative;height:100%;border-radius:5px;overflow:hidden;background:rgba(255,255,255,.08)}
+.bat .a,.bat .b{position:absolute;top:0;bottom:0;transition:all .25s}
+.bat .a{left:0;background:#35d0a5}
+.bat .b{background:repeating-linear-gradient(135deg,#4fb8ff 0 8px,#3aa3ea 8px 16px);opacity:.85}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.tile{background:rgba(255,255,255,.07);border-radius:12px;padding:10px 12px}
+.tile b{display:block;font-size:22px;white-space:nowrap}
+.tile.ok{background:rgba(53,208,165,.16);border:1px solid #35d0a5;color:#7fe7c8}
+.tile.tip{background:rgba(245,184,79,.14);border:1px solid #f5b84f;color:#ffd895}
+.note{font-size:13px;color:var(--mute);margin:12px 0 0}
+.per{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:8px 0 4px;background:rgba(255,255,255,.08)}
+.per i{display:block;height:100%}
+.leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:#9fc0d2}
+.leg span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;background:var(--c)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--line);outline:none;margin:10px 0 18px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:5px solid var(--ok);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:5px solid var(--ok)}
+#obj::-webkit-slider-thumb{border-color:var(--tgt)}#obj::-moz-range-thumb{border-color:var(--tgt)}
+input:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--tgt);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:-6px}
+.chip{min-height:38px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.opts{display:grid;gap:8px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:56px;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.opt[aria-pressed=true]{border-color:var(--tgt);background:light-dark(#e6f2fb,#1b3a4f)}
+.opt small{display:block;color:var(--mute);font-size:13px}
+.opt span.k{font-weight:700;color:var(--tgt);white-space:nowrap}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+.f label{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}
+.f input,textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+.hero input[type=time]{width:100%;font:inherit;font-size:22px;font-weight:700;background:transparent;color:#fff;border:0;padding:0;color-scheme:dark}
+.mini{border:0;border-radius:999px;padding:3px 9px;background:rgba(79,184,255,.22);color:#9fd6ff;cursor:pointer;font:inherit;font-size:12px}
+.btn{min-height:44px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.warn{color:var(--warn);font-size:13px;margin:8px 0 0}
+.okt{color:var(--ok);font-size:13px;margin:6px 0 0}
+details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="sub">Changan Deepal S05 PHEV · LFP 18,42 kWh · AC 11 kW · DC 55 kW</p>
+  <h1>Calculadora de carga</h1>
+
+  <div class="card hero" aria-live="polite">
+    <div class="row">
+      <div><p class="lab">Ahora</p><div class="pct" id="vAct" style="color:#35d0a5">30%</div></div>
+      <div style="text-align:right"><p class="lab">Objetivo</p><div class="pct" id="vObj" style="color:#4fb8ff">100%</div></div>
+    </div>
+    <div class="bat" style="color:#9fc0d2"><div class="in"><div class="a" id="barA"></div><div class="b" id="barB"></div></div></div>
+    <p class="lab" style="margin-top:14px">Tiempo de carga</p>
+    <div class="big" id="tiempo">—</div>
+    <div class="grid2">
+      <div class="tile">
+        <div class="row" style="align-items:center"><p class="lab" style="margin:0">Inicio</p><button class="mini" id="btnAhora" hidden>Ahora</button></div>
+        <input type="time" id="hIni" aria-label="Hora de inicio">
+        <p class="lab" id="iniTxt" style="margin:0">hora actual</p>
+      </div>
+      <div class="tile ok"><p class="lab" style="color:#7fe7c8;margin:0">Fin de carga</p><b id="hFin">—</b><p class="lab" id="finTxt" style="margin:0;color:#7fe7c8"></p></div>
+      <div class="tile"><p class="lab" style="margin:0">Energía de la red</p><b id="kwh">—</b></div>
+      <div class="tile"><p class="lab" style="margin:0" id="costeLab">Coste estimado</p><b id="coste">—</b><p class="lab" id="costeSub" style="margin:0"></p></div>
+    </div>
+    <div id="pvBox" hidden>
+      <div class="per" id="perBar"></div>
+      <div class="leg" id="perLeg"></div>
+      <div class="tile tip" style="margin-top:10px"><p class="lab" style="margin:0;color:#ffd895">Hora más barata para empezar (próximas 24 h)</p><b id="mejor">—</b><p class="lab" id="mejorSub" style="margin:0;color:#ffd895"></p><button class="mini" id="usarMejor" style="margin-top:6px">Usar esta hora</button></div>
+    </div>
+    <div class="tile" style="margin-top:10px"><p class="lab" style="margin:0">Autonomía eléctrica añadida</p><b id="km">—</b><p class="lab" id="dias" style="margin:0"></p></div>
+    <p class="note" id="detalle"></p>
+  </div>
+
+  <div class="card">
+    <label class="lab" for="act">Batería actual</label>
+    <input type="range" id="act" min="0" max="100" value="30">
+    <label class="lab" for="obj">Objetivo de carga</label>
+    <input type="range" id="obj" min="0" max="100" value="100">
+    <div class="chips" id="presets">
+      <button class="chip" data-v="80">Hasta 80%</button>
+      <button class="chip" data-v="90">Hasta 90%</button>
+      <button class="chip" data-v="100">Hasta 100%</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="lab">Cargador</p>
+    <div class="opts" id="opts"></div>
+    <div class="fields" id="customBox" hidden>
+      <div class="f"><label for="kwc">Potencia (kW)</label><input type="number" id="kwc" min="0.5" max="55" step="0.1" value="6"></div>
+    </div>
+    <p class="warn" id="aviso" hidden></p>
+  </div>
+
+  <div class="card" id="pvCard" hidden>
+    <p class="lab">Tarifa PVPC 2.0TD (casa)</p>
+    <p class="okt" id="autoOk" style="margin:0 0 8px">Buscando precios oficiales de hoy y mañana…</p>
+    <details style="margin-bottom:4px"><summary>Pegar precios a mano (opcional)</summary>
+    <p class="note" style="margin:0 0 4px">Solo hace falta si no hay precios automáticos para ese día. 24 valores (o 96 cuartohorarios) en €/kWh o €/MWh, con coma o punto.</p>
+    <textarea id="horas" placeholder="0,1123&#10;0,1045&#10;0,0987&#10;…"></textarea>
+    <p class="okt" id="horasOk"></p></details>
+    <p class="note" style="margin:8px 0 0">Las horas sin precio oficial (normalmente mañana antes de las 20:15) se calculan con los precios por tramo:</p>
+    <div class="fields">
+      <div class="f"><label for="pPunta">Punta (€/kWh)</label><input type="number" id="pPunta" step="0.001" min="0"></div>
+      <div class="f"><label for="pLlano">Llano (€/kWh)</label><input type="number" id="pLlano" step="0.001" min="0"></div>
+      <div class="f"><label for="pValle">Valle (€/kWh)</label><input type="number" id="pValle" step="0.001" min="0"></div>
+      <div class="f"><label for="imp">Impuestos sobre energía (%)</label><input type="number" id="imp" step="0.1" min="0"></div>
+    </div>
+    <div class="row" style="margin-top:10px;align-items:center"><p class="note" style="margin:0">Punta 10–14 y 18–22 · llano 8–10, 14–18 y 22–24 · valle 0–8, sábados y domingos (L–V).</p><button class="btn" id="limpiar">Borrar precios</button></div>
+  </div>
+
+  <div class="card">
+    <p class="lab">Precio y consumo</p>
+    <div class="fields">
+      <div class="f" id="precioBox"><label for="precio">Precio (€/kWh)</label><input type="number" id="precio" min="0" step="0.01" value="0.39"></div>
+      <div class="f"><label for="cons">Consumo EV (kWh/100 km)</label><input type="number" id="cons" min="8" max="40" step="0.5" value="20"></div>
+      <div class="f"><label for="kmdia">Km eléctricos al día</label><input type="number" id="kmdia" min="0" step="1" value="0"></div>
+    </div>
+    <p class="note">WLTP homologa 18 kWh/100 km; en montaña y en invierno lo real suele ser más alto.</p>
+  </div>
+
+  <details class="card">
+    <summary>Cómo calcula</summary>
+    <p>Energía = 18,42 kWh × (objetivo − actual). En AC se suman ~10 % de pérdidas y 10 min de equilibrado de celdas LFP si cargas al 100 %. La potencia AC se limita a 11 kW, el máximo del coche.</p>
+    <p>Con el Depow, el coste se calcula minuto a minuto: cada minuto de carga se paga al precio de su hora. Los impuestos (impuesto eléctrico 5,11 % + IVA 21 % ≈ 27,2 %) se aplican sobre el precio del término de energía. No incluye el término de potencia, que pagas igual cargues o no. Los festivos nacionales también son valle; la calculadora solo trata como valle los fines de semana.</p>
+    <p>En DC (55 kW) se usa una curva aproximada: ~38 kW medios hasta el 80 % y ~12 kW de 80 a 100 %.</p>
+    <p>Los 18,42 kWh son capacidad total; el coche reserva una parte, así que trátalo como estimación al alza.</p>
+  </details>
+</div>
+
+<script>
+{
+const BAT=18.42, AC_MAX=11, DC_MAX=55, EF_AC=0.9, EF_DC=0.95;
+const CARG=[
+  {id:"depow8",n:"Depow V2 a 8 A",d:"Garaje · PVPC",kw:1.84,pv:true},
+  {id:"depow10",n:"Depow V2 a 10 A",d:"Garaje · PVPC",kw:2.3,pv:true},
+  {id:"depow16",n:"Depow V2 a 16 A",d:"Máximo del portátil · PVPC",kw:3.7,pv:true},
+  {id:"wb74",n:"Wallbox 7,4 kW",d:"32 A monofásico",kw:7.4,p:0.15},
+  {id:"pub22",n:"Poste público 22 kW",d:"Iberdrola AC · el coche toma 11 kW",kw:22,p:0.39},
+  {id:"dc55",n:"Cargador rápido DC",d:"Máx. 55 kW del S05",kw:55,dc:true,p:0.49},
+  {id:"custom",n:"Otra potencia",d:"Introduce los kW",kw:null,p:0.2}
+];
+const COL={valle:"#35d0a5",llano:"#f5b84f",punta:"#ff6b6b"};
+const $=id=>document.getElementById(id);
+let st={act:30,obj:100,id:"depow10",kwc:6,cons:20,kmdia:0,ini:null,precios:{},
+  pv:{punta:0.20,llano:0.13,valle:0.08,imp:27.2,horas:""}};
+try{const s=JSON.parse(localStorage.getItem("cargaS05phev")||"{}");Object.assign(st,s,{pv:Object.assign(st.pv,s.pv||{})});st.ini=null}catch(e){}
+const save=()=>{try{localStorage.setItem("cargaS05phev",JSON.stringify(st))}catch(e){}};
+
+function dur(h){const t=Math.round(h*60),H=Math.floor(t/60),M=t%60;return H?(M?`${H} h ${M} min`:`${H} h`):`${M} min`}
+const hora=d=>d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
+const pad=n=>String(n).padStart(2,"0");
+const num=(v,d=1)=>v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+function parseHoras(t){
+  const v=(t||"").split(/[\s;\t|]+/).map(x=>x.trim().replace(",",".")).filter(x=>x!==""&&!isNaN(+x)).map(Number);
+  if(v.length!==24&&v.length!==96)return null;
+  return v.map(x=>x>2?x/1000:x); // €/MWh -> €/kWh
+}
+function periodo(d){const w=d.getDay(),h=d.getHours();
+  if(w===0||w===6||h<8)return"valle";if((h>=10&&h<14)||(h>=18&&h<22))return"punta";return"llano"}
+let AUTO=null; // {dias:{"AAAA-MM-DD":[24 €/kWh]}}
+const clave=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const auto=d=>{const a=AUTO&&AUTO.dias[clave(d)];const v=a&&a[d.getHours()];return typeof v==="number"?v:null};
+function precioEn(d,H){const f=1+(+st.pv.imp||0)/100;
+  const a=auto(d);if(a!=null)return a*f;
+  if(H)return(H.length===24?H[d.getHours()]:H[d.getHours()*4+Math.floor(d.getMinutes()/15)])*f;
+  return(+st.pv[periodo(d)]||0)*f}
+function simula(ini,minCarga,eRed,H){ // coste minuto a minuto
+  const k=eRed/minCarga,r={c:0,valle:0,llano:0,punta:0};
+  for(let m=0;m<minCarga;m++){const d=new Date(ini.getTime()+m*6e4);r.c+=k*precioEn(d,H);r[periodo(d)]+=k}
+  return r;
+}
+const dcRate=(pct,max)=>Math.min(pct<80?38:12,max);
+
+function renderOpts(){
+  $("opts").innerHTML=CARG.map(c=>`<button class="opt" data-id="${c.id}" aria-pressed="${c.id===st.id}">
+    <span><b style="font-weight:500">${c.n}</b><small>${c.d}</small></span>
+    <span class="k">${c.kw?num(c.kw,c.kw%1?1:0)+" kW":"—"}</span></button>`).join("");
+}
+
+function calc(){
+  const c=CARG.find(x=>x.id===st.id)||CARG[1];
+  const kw=c.kw??Math.max(0.1,+st.kwc||0.1);
+  const isDC=c.dc||(c.id==="custom"&&kw>AC_MAX);
+  const delta=Math.max(0,st.obj-st.act);
+  const eBat=BAT*delta/100;
+  let h=0,eRed,pot,bal=0;
+  if(isDC){pot=Math.min(kw,DC_MAX);for(let p=st.act;p<st.obj;p++)h+=(BAT/100)/dcRate(p,pot);eRed=eBat/EF_DC}
+  else{pot=Math.min(kw,AC_MAX);h=eBat/(pot*EF_AC);bal=st.obj>=99&&delta>0?10/60:0;h+=bal;eRed=eBat/EF_AC}
+  const now=new Date();
+  let ini=now;
+  if(st.ini){const[a,b]=st.ini.split(":").map(Number);ini=new Date(now);ini.setHours(a,b,0,0);if(ini<now-60000)ini.setDate(ini.getDate()+1)}
+  const fin=new Date(ini.getTime()+h*3.6e6);
+  const km=eBat/Math.max(1,+st.cons||20)*100;
+  const H=parseHoras(st.pv.horas);
+
+  $("vAct").textContent=st.act+"%";$("vObj").textContent=st.obj+"%";
+  $("barA").style.width=st.act+"%";$("barB").style.left=st.act+"%";$("barB").style.width=delta+"%";
+  $("act").value=st.act;$("obj").value=st.obj;
+  $("hIni").value=st.ini||`${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  $("btnAhora").hidden=!st.ini;
+  $("iniTxt").textContent=st.ini?(ini.getDate()!==now.getDate()?"mañana":"hoy"):"hora actual";
+  $("cons").value=st.cons;$("kmdia").value=st.kmdia;$("kwc").value=st.kwc;
+  $("customBox").hidden=c.id!=="custom";
+  $("pvCard").hidden=!c.pv;$("pvBox").hidden=!c.pv||!delta;$("precioBox").hidden=!!c.pv;
+  if(!c.pv)$("precio").value=st.precios[c.id]??c.p;
+  $("horasOk").textContent=st.pv.horas.trim()?(H?`Usando ${H.length} precios ${H.length===24?"horarios":"cuartohorarios"} pegados.`:"No reconozco 24 ni 96 valores: uso los precios por tramo."):"";
+  const av=$("aviso");
+  if(c.id==="pub22"){av.hidden=false;av.textContent="El S05 PHEV admite 11 kW en AC: en un poste de 22 kW cargas a 11 kW (si el poste es trifásico)."}
+  else if(c.id==="custom"&&kw>AC_MAX){av.hidden=false;av.textContent=`Más de 11 kW solo es posible en DC: se calcula como carga rápida${kw>DC_MAX?" limitada a 55 kW":""}.`}
+  else av.hidden=true;
+  document.querySelectorAll(".opt").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===st.id));
+
+  if(!delta){
+    $("tiempo").textContent="Cargada";["hFin","kwh","coste","km"].forEach(i=>$(i).textContent="—");
+    $("finTxt").textContent="";$("dias").textContent="";$("costeSub").textContent="";$("detalle").textContent="La batería ya está en el objetivo.";return;
+  }
+  $("tiempo").textContent=dur(h);
+  $("hFin").textContent=hora(fin);
+  $("finTxt").textContent=fin.getDate()!==ini.getDate()?"día siguiente":"";
+  $("kwh").textContent=num(eRed)+" kWh";
+  $("km").textContent="≈ "+Math.round(km)+" km";
+  $("dias").textContent=+st.kmdia>0?`Cubre unos ${num(km/st.kmdia,1)} días a ${st.kmdia} km/día`:"Añade tus km diarios para ver cuántos días cubre";
+
+  if(c.pv){
+    const minC=Math.max(1,Math.round((h-bal)*60));
+    const r=simula(ini,minC,eRed,H);
+    $("costeLab").textContent="Coste PVPC";
+    $("coste").textContent=num(r.c,2)+" €";
+    $("costeSub").textContent=`media ${num(r.c/eRed,3)} €/kWh`;
+    $("perBar").innerHTML=["valle","llano","punta"].map(p=>`<i style="width:${r[p]/eRed*100}%;background:${COL[p]}"></i>`).join("");
+    $("perLeg").innerHTML=["valle","llano","punta"].filter(p=>r[p]>0.01).map(p=>`<span style="--c:${COL[p]}">${p[0].toUpperCase()+p.slice(1)} ${num(r[p])} kWh</span>`).join("");
+    // mejor hora de inicio en las próximas 24 h
+    const base=new Date(now);base.setMinutes(0,0,0);base.setHours(base.getHours()+1);
+    let best=null;
+    for(let i=0;i<24;i++){const s=new Date(base.getTime()+i*3.6e6);const x=simula(s,minC,eRed,H).c;if(!best||x<best.c-1e-9)best={s,c:x}}
+    $("mejor").textContent=`${hora(best.s)} → ${num(best.c,2)} €`;
+    const ahorro=r.c-best.c;
+    $("mejorSub").textContent=`Terminaría a las ${hora(new Date(best.s.getTime()+h*3.6e6))}${ahorro>0.005?` · ahorras ${num(ahorro,2)} €`:" · ya es lo más barato"}`;
+    $("usarMejor").onclick=()=>{st.ini=`${pad(best.s.getHours())}:00`;calc()};
+  }else{
+    const precio=st.precios[c.id]??c.p;
+    $("costeLab").textContent="Coste estimado";
+    $("coste").textContent=num(eRed*precio,2)+" €";
+    $("costeSub").textContent=`a ${num(precio,2)} €/kWh`;
+  }
+  $("detalle").innerHTML=isDC
+    ? `${num(eBat)} kWh a la batería en DC (curva media ~38 kW hasta 80 %, ~12 kW después).`
+    : `${num(eBat)} kWh a la batería a ${num(pot,2)} kW · incluye ~10 % de pérdidas AC${bal?" y 10 min de equilibrado al 100 %":""}. Programa en el coche: inicio <b>${hora(ini)}</b>, fin <b>${hora(fin)}</b>.`;
+}
+const upd=()=>{save();calc()};
+const pvIn=(id,k)=>{$(id).value=st.pv[k];$(id).addEventListener("input",e=>{st.pv[k]=e.target.value;upd()})};
+pvIn("pPunta","punta");pvIn("pLlano","llano");pvIn("pValle","valle");pvIn("imp","imp");
+$("horas").value=st.pv.horas;
+$("horas").addEventListener("input",e=>{st.pv.horas=e.target.value;upd()});
+$("limpiar").addEventListener("click",()=>{st.pv.horas="";$("horas").value="";upd()});
+$("act").addEventListener("input",e=>{st.act=+e.target.value;if(st.act>st.obj)st.obj=st.act;upd()});
+$("obj").addEventListener("input",e=>{st.obj=+e.target.value;if(st.obj<st.act)st.act=st.obj;upd()});
+$("presets").addEventListener("click",e=>{const v=e.target.dataset.v;if(v){st.obj=+v;if(st.act>st.obj)st.act=st.obj;upd()}});
+$("opts").addEventListener("click",e=>{const b=e.target.closest(".opt");if(b){st.id=b.dataset.id;upd()}});
+$("kwc").addEventListener("input",e=>{st.kwc=e.target.value;upd()});
+$("precio").addEventListener("input",e=>{st.precios[st.id]=+e.target.value||0;upd()});
+$("cons").addEventListener("input",e=>{st.cons=e.target.value;upd()});
+$("kmdia").addEventListener("input",e=>{st.kmdia=e.target.value;upd()});
+$("hIni").addEventListener("change",e=>{st.ini=e.target.value||null;calc()});
+$("btnAhora").addEventListener("click",()=>{st.ini=null;calc()});
+function cargaAuto(){
+  fetch("precios.json?"+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+    AUTO=j;const n=new Date(),m=new Date(n.getTime()+864e5);
+    const tiene=d=>!!(j.dias[clave(d)]&&j.dias[clave(d)].some(v=>v!=null));
+    const act=new Date(j.actualizado).toLocaleString("es-ES",{weekday:"short",hour:"2-digit",minute:"2-digit"});
+    $("autoOk").textContent=`Precios oficiales PVPC: hoy ${tiene(n)?"✓":"—"} · mañana ${tiene(m)?"✓":"aún no publicados"} (actualizado ${act}, ${j.fuente}).`;
+    calc();
+  }).catch(()=>{$("autoOk").textContent="Sin precios automáticos aquí: se usan los manuales o por tramo.";});
+}
+renderOpts();calc();cargaAuto();
+setInterval(()=>{if(!st.ini)calc()},30000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)cargaAuto()});
+}
+</script>
+</body>
+</html>

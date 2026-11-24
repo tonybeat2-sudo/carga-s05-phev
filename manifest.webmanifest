@@ -1,0 +1,10 @@
+{
+  "name": "Carga S05 PHEV",
+  "short_name": "Carga S05",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1a22",
+  "theme_color": "#0b1a22",
+  "lang": "es",
+  "icons": [{ "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }]
+}
