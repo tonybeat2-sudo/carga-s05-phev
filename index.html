@@ -72,12 +72,6 @@ textarea{min-height:90px;resize:vertical}
 .warn{color:var(--warn);font-size:13px;margin:8px 0 0}
 .okt{color:var(--ok);font-size:13px;margin:6px 0 0}
 details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
-.sliders{margin:14px 0 18px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.14)}
-.sl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin:0}
-.sl b{font-size:20px}
-.hero input[type=range]{background:rgba(255,255,255,.2);margin:10px 0 16px;touch-action:none}
-.hero .chip{color:#eef5f8;border-color:rgba(255,255,255,.3)}
-.hero .chips{margin-top:-4px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -92,17 +86,6 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
       <div style="text-align:right"><p class="lab">Objetivo</p><div class="pct" id="vObj" style="color:#4fb8ff">100%</div></div>
     </div>
     <div class="bat" style="color:#9fc0d2"><div class="in"><div class="a" id="barA"></div><div class="b" id="barB"></div></div></div>
-    <div class="sliders">
-      <label class="lab sl" for="act"><span>Batería actual</span><b id="lAct" style="color:#35d0a5">30%</b></label>
-      <input type="range" id="act" min="0" max="100" value="30">
-      <label class="lab sl" for="obj"><span>Objetivo de carga</span><b id="lObj" style="color:#4fb8ff">100%</b></label>
-      <input type="range" id="obj" min="0" max="100" value="100">
-      <div class="chips" id="presets">
-        <button class="chip" data-v="80">Hasta 80%</button>
-        <button class="chip" data-v="90">Hasta 90%</button>
-        <button class="chip" data-v="100">Hasta 100%</button>
-      </div>
-    </div>
     <p class="lab" style="margin-top:14px">Tiempo de carga</p>
     <div class="big" id="tiempo">—</div>
     <div class="grid2">
@@ -122,6 +105,18 @@ details{font-size:14px;color:var(--mute)}summary{cursor:pointer;min-height:32px}
     </div>
     <div class="tile" style="margin-top:10px"><p class="lab" style="margin:0">Autonomía eléctrica añadida</p><b id="km">—</b><p class="lab" id="dias" style="margin:0"></p></div>
     <p class="note" id="detalle"></p>
+  </div>
+
+  <div class="card">
+    <label class="lab" for="act">Batería actual</label>
+    <input type="range" id="act" min="0" max="100" value="30">
+    <label class="lab" for="obj">Objetivo de carga</label>
+    <input type="range" id="obj" min="0" max="100" value="100">
+    <div class="chips" id="presets">
+      <button class="chip" data-v="80">Hasta 80%</button>
+      <button class="chip" data-v="90">Hasta 90%</button>
+      <button class="chip" data-v="100">Hasta 100%</button>
+    </div>
   </div>
 
   <div class="card">
@@ -191,6 +186,7 @@ const save=()=>{try{localStorage.setItem("cargaS05phev",JSON.stringify(st))}catc
 function dur(h){const t=Math.round(h*60),H=Math.floor(t/60),M=t%60;return H?(M?`${H} h ${M} min`:`${H} h`):`${M} min`}
 const hora=d=>d.toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"});
 const pad=n=>String(n).padStart(2,"0");
+const cuando=(d,now)=>{const dd=Math.round((new Date(d).setHours(0,0,0,0)-new Date(now).setHours(0,0,0,0))/864e5);return `${dd===0?"hoy":dd===1?"mañana":"pasado mañana"} a las ${hora(d)}`};
 const num=(v,d=1)=>v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
 
 function parseHoras(t){
@@ -208,8 +204,8 @@ function precioEn(d,H){const f=1+(+st.pv.imp||0)/100;
   if(H)return(H.length===24?H[d.getHours()]:H[d.getHours()*4+Math.floor(d.getMinutes()/15)])*f;
   return(+st.pv[periodo(d)]||0)*f}
 function simula(ini,minCarga,eRed,H){ // coste minuto a minuto
-  const k=eRed/minCarga,r={c:0,valle:0,llano:0,punta:0};
-  for(let m=0;m<minCarga;m++){const d=new Date(ini.getTime()+m*6e4);r.c+=k*precioEn(d,H);r[periodo(d)]+=k}
+  const k=eRed/minCarga,r={c:0,valle:0,llano:0,punta:0,est:false};
+  for(let m=0;m<minCarga;m++){const d=new Date(ini.getTime()+m*6e4);r.c+=k*precioEn(d,H);r[periodo(d)]+=k;if(auto(d)==null&&!H)r.est=true}
   return r;
 }
 const dcRate=(pct,max)=>Math.min(pct<80?38:12,max);
@@ -236,7 +232,7 @@ function calc(){
   const km=eBat/Math.max(1,+st.cons||20)*100;
   const H=parseHoras(st.pv.horas);
 
-  $("vAct").textContent=st.act+"%";$("vObj").textContent=st.obj+"%";$("lAct").textContent=st.act+"%";$("lObj").textContent=st.obj+"%";
+  $("vAct").textContent=st.act+"%";$("vObj").textContent=st.obj+"%";
   $("barA").style.width=st.act+"%";$("barB").style.left=st.act+"%";$("barB").style.width=delta+"%";
   $("act").value=st.act;$("obj").value=st.obj;
   $("hIni").value=st.ini||`${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -269,16 +265,17 @@ function calc(){
     const r=simula(ini,minC,eRed,H);
     $("costeLab").textContent="Coste PVPC";
     $("coste").textContent=num(r.c,2)+" €";
-    $("costeSub").textContent=`media ${num(r.c/eRed,3)} €/kWh`;
+    $("costeSub").textContent=`media ${num(r.c/eRed,3)} €/kWh${r.est?" · estimado":""}`;
     $("perBar").innerHTML=["valle","llano","punta"].map(p=>`<i style="width:${r[p]/eRed*100}%;background:${COL[p]}"></i>`).join("");
     $("perLeg").innerHTML=["valle","llano","punta"].filter(p=>r[p]>0.01).map(p=>`<span style="--c:${COL[p]}">${p[0].toUpperCase()+p.slice(1)} ${num(r[p])} kWh</span>`).join("");
     // mejor hora de inicio en las próximas 24 h
     const base=new Date(now);base.setMinutes(0,0,0);base.setHours(base.getHours()+1);
-    let best=null;
-    for(let i=0;i<24;i++){const s=new Date(base.getTime()+i*3.6e6);const x=simula(s,minC,eRed,H).c;if(!best||x<best.c-1e-9)best={s,c:x}}
-    $("mejor").textContent=`${hora(best.s)} → ${num(best.c,2)} €`;
-    const ahorro=r.c-best.c;
-    $("mejorSub").textContent=`Terminaría a las ${hora(new Date(best.s.getTime()+h*3.6e6))}${ahorro>0.005?` · ahorras ${num(ahorro,2)} €`:" · ya es lo más barato"}`;
+    const x0=simula(now,minC,eRed,H);let best={s:now,c:x0.c,est:x0.est};
+    for(let i=0;i<24;i++){const s=new Date(base.getTime()+i*3.6e6);const x=simula(s,minC,eRed,H);if(x.c<best.c-1e-9)best={s,c:x.c,est:x.est}}
+    const esAhora=best.s===now,finB=new Date(best.s.getTime()+h*3.6e6),ahorro=r.c-best.c;
+    $("mejor").textContent=`${esAhora?"Ahora mismo":cuando(best.s,now)} → ${num(best.c,2)} €`;
+    $("mejorSub").textContent=`Terminaría ${cuando(finB,now)}${ahorro>0.005?` · ahorras ${num(ahorro,2)} €`:" · ya es lo más barato"}${best.est?" · con precios aún no publicados (estimado)":""}`;
+    $("usarMejor").hidden=esAhora;
     $("usarMejor").onclick=()=>{st.ini=`${pad(best.s.getHours())}:00`;calc()};
   }else{
     const precio=st.precios[c.id]??c.p;
