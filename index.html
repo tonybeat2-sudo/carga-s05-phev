@@ -392,8 +392,21 @@ tr.addEventListener("pointerup",fin);tr.addEventListener("pointercancel",fin);
   if(e.key==="ArrowLeft"||e.key==="ArrowDown"){fija(w,Math.max(0,cur-p));e.preventDefault()}}));}
 $("tarSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(b){st.tar=b.dataset.t;upd()}});
 $("iogP").value=st.iogP;$("iogP").addEventListener("input",e=>{st.iogP=e.target.value;upd()});
-function cargaAuto(){
-  fetch("precios.json?"+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+function cargaREE(){
+  const n=new Date(),m=new Date(n.getTime()+864e5);
+  const url="https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real?start_date="+clave(n)+"T00:00&end_date="+clave(m)+"T23:59&time_trunc=hour";
+  return fetch(url,{headers:{Accept:"application/json"},cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+    const se=(j.included||[]).find(x=>/pvpc/i.test((x.attributes&&x.attributes.title)||""));if(!se)return;
+    AUTO=AUTO||{dias:{}};AUTO.dias=AUTO.dias||{};
+    se.attributes.values.forEach(v=>{const p=v.datetime.split("T"),h=+p[1].slice(0,2);AUTO.dias[p[0]]=AUTO.dias[p[0]]||Array(24).fill(null);AUTO.dias[p[0]][h]=+(v.value/1000).toFixed(5)});
+    const tiene=d=>!!(AUTO.dias[clave(d)]&&AUTO.dias[clave(d)].some(v=>v!=null));
+    $("autoOk").textContent="Precios oficiales PVPC en directo de Red Eléctrica: hoy "+(tiene(n)?"✓":"—")+" · mañana "+(tiene(m)?"✓":"aún no publicados (salen hacia las 20:15)")+" · comprobado a las "+hora(n)+".";
+    renderPrecios();calc();
+  }).catch(()=>{});
+}
+function cargaAuto(){cargaArchivo().then(cargaREE)}
+function cargaArchivo(){
+  return fetch("precios.json?"+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
     AUTO=j;const n=new Date(),m=new Date(n.getTime()+864e5);
     const tiene=d=>!!(j.dias[clave(d)]&&j.dias[clave(d)].some(v=>v!=null));
     const act=new Date(j.actualizado).toLocaleString("es-ES",{weekday:"short",hour:"2-digit",minute:"2-digit"});
@@ -402,6 +415,7 @@ function cargaAuto(){
   }).catch(()=>{$("autoOk").textContent="Sin precios automáticos aquí: se usan los manuales o por tramo.";});
 }
 renderOpts();calc();cargaAuto();
+setInterval(cargaAuto,10*60*1000);
 setInterval(()=>{if(!st.ini)calc()},30000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)cargaAuto()});
 }
